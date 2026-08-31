@@ -1,0 +1,11 @@
+# KiCad temporary and local files
+*.lck
+*.kicad_prl
+.history/
+
+# STM32CubeIDE build output
+Debug/
+Release/
+
+# Windows
+Thumbs.db
