@@ -476,6 +476,58 @@ HAL_UART_Transmit(&huart2, &rxData, 1, HAL_MAX_DELAY);
 
 Inside `while (1)`, each received byte is immediately transmitted back to the PC. The firmware built successfully and was programmed onto the NUCLEO-L476RG.
 
+
+#### Milestone 4 — Interrupt-Driven UART RX / Echo
+
+USART2 interrupt handling was enabled in the `.ioc` configuration through:
+
+`Pinout & Configuration → System Core → NVIC → USART2 global interrupt`
+
+The generated configuration uses Preemption Priority `0` and Sub Priority `0`.
+
+CubeMX generated the USART2 NVIC initialization and interrupt-handler support:
+
+```c
+HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+HAL_NVIC_EnableIRQ(USART2_IRQn);
+```
+
+```c
+void USART2_IRQHandler(void)
+{
+    HAL_UART_IRQHandler(&huart2);
+}
+```
+
+The receive variable was moved to private global scope:
+
+```c
+uint8_t rxData;
+```
+
+Interrupt-driven reception is initially armed before the main loop:
+
+```c
+HAL_UART_Receive_IT(&huart2, &rxData, 1);
+```
+
+The previous blocking polling receive/transmit operations were removed from `while (1)`.
+
+The receive-complete callback echoes each byte and then re-arms reception for the next byte:
+
+```c
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        HAL_UART_Transmit(&huart2, &rxData, 1, HAL_MAX_DELAY);
+        HAL_UART_Receive_IT(&huart2, &rxData, 1);
+    }
+}
+```
+
+The `huart->Instance == USART2` check ensures that the callback processing applies to USART2. `HAL_UART_Receive_IT()` returns without blocking the calling code. After one byte is received, the receive operation completes, so the callback re-arms reception for the next byte.
+
 ---
 
 ## Test and Record Results
@@ -547,6 +599,18 @@ Tera Term was connected to `COM3` at `115200 8N1` with no flow control. The STM3
 
 For troubleshooting, Tera Term `Local echo` was temporarily enabled. Typing `A` displayed `AA`: one locally displayed character and one character returned by the STM32. `Local echo` was then disabled, and typing `HELLO` displayed `HELLO` once, confirming the PC → STM32 → PC echo path.
 
+#### Interrupt-Driven UART RX / Echo
+
+**Result: PASS**
+
+USART2 interrupt handling was enabled in NVIC and reception was changed from blocking polling to interrupt-driven one-byte reception using `HAL_UART_Receive_IT()`.
+
+With Tera Term connected to `COM3` at `115200 8N1`, no flow control, and `Local echo` disabled, each typed character was received by the STM32 and echoed back to the terminal.
+
+Continuous character entry was successful because `HAL_UART_RxCpltCallback()` re-armed `HAL_UART_Receive_IT()` after every received byte.
+
+As an additional validation, disconnecting the board from USB stopped characters from appearing in Tera Term. With local echo disabled, this confirmed that the displayed characters were being returned through the STM32 UART echo path rather than displayed locally by the terminal.
+
 ### Issues Found
 
 #### Incorrect UART Handle
@@ -591,13 +655,13 @@ Current technical documentation includes:
 - Official NUCLEO-L476RG reference documentation
 - Educational KiCad schematic
 - Exported schematic PDF
-- UART configuration, TX, RX polling, and echo implementation notes in this workflow
+- UART configuration, TX, RX polling, echo, and interrupt-driven RX/echo implementation notes in this workflow
 
 ### Test Documentation
 
 UART TX configuration, serial connection, troubleshooting, and the successful TX test result are recorded in this workflow.
 
-UART RX polling and echo implementation and successful test results are also recorded in this workflow. Interrupt-driven UART results will be added when that milestone is completed.
+UART RX polling, echo, and interrupt-driven RX/echo implementation and successful test results are also recorded in this workflow.
 
 ---
 
@@ -629,6 +693,12 @@ The UART RX / echo milestone was committed as:
 
 The milestone was pushed successfully to `origin/main`.
 
+The interrupt-driven UART RX / echo milestone was committed as:
+
+`5047fe2` — `Implement and validate interrupt-driven UART RX echo`
+
+The milestone was pushed successfully to `origin/main`.
+
 After the push, the local `main` branch and `origin/main` were synchronized and the working tree was clean.
 
 ---
@@ -640,14 +710,14 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 - UART TX: Complete and validated
 - UART RX using polling: Complete and validated
 - UART echo: Complete and validated
-- Interrupt-driven UART: Pending
+- Interrupt-driven UART RX / echo: Complete and validated
 
 ### Testing
 
 - UART TX test: PASS
 - UART RX polling test: PASS
 - UART echo test: PASS
-- Interrupt-driven UART testing: Pending
+- Interrupt-driven UART RX / echo test: PASS
 
 ### Documentation
 
@@ -657,7 +727,7 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 - UART TX implementation and test documentation: Complete
 - UART RX polling and echo implementation/test documentation: Complete
 - README: Pending
-- Interrupt-driven UART documentation: Pending
+- Interrupt-driven UART RX / echo implementation/test documentation: Complete
 
 ### Repository
 
@@ -668,6 +738,8 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 - UART TX milestone pushed successfully to `origin/main`
 - UART RX / echo milestone committed as `15d0565` — `Implement and validate UART RX echo`
 - UART RX / echo milestone pushed successfully to `origin/main`
+- Interrupt-driven UART RX / echo milestone committed as `5047fe2` — `Implement and validate interrupt-driven UART RX echo`
+- Interrupt-driven UART RX / echo milestone pushed successfully to `origin/main`
 - Local `main` synchronized with `origin/main`
 - Working tree clean after push
 
@@ -675,7 +747,7 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 
 **Project in progress.**
 
-The UART TX, polling-based UART RX, and UART echo milestones are complete, validated, documented, committed, and pushed to GitHub.
+The UART TX, polling-based UART RX, UART echo, and interrupt-driven UART RX / echo milestones are complete, validated, documented, committed, and pushed to GitHub.
 
-The next implementation milestone is interrupt-driven UART communication.
+The remaining project work is final testing, README completion, and final project documentation/review.
 
