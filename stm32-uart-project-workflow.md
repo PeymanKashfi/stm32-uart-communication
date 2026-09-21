@@ -449,6 +449,33 @@ The firmware was successfully built in STM32CubeIDE and programmed onto the NUCL
 
 During the first build attempt, the UART handle was accidentally written as `&huart`. The build error identified that `huart` was undeclared. The handle was corrected to `&huart2`, after which the project built successfully.
 
+#### Milestone 2 — UART RX Using Polling
+
+A one-byte receive variable was added before the main loop:
+
+```c
+uint8_t rxData;
+```
+
+Polling-based reception uses USART2:
+
+```c
+HAL_UART_Receive(&huart2, &rxData, 1, HAL_MAX_DELAY);
+```
+
+This blocking call receives one byte through USART2 and stores it in `rxData`.
+
+#### Milestone 3 — UART Echo
+
+UART echo was implemented with:
+
+```c
+HAL_UART_Receive(&huart2, &rxData, 1, HAL_MAX_DELAY);
+HAL_UART_Transmit(&huart2, &rxData, 1, HAL_MAX_DELAY);
+```
+
+Inside `while (1)`, each received byte is immediately transmitted back to the PC. The firmware built successfully and was programmed onto the NUCLEO-L476RG.
+
 ---
 
 ## Test and Record Results
@@ -512,6 +539,14 @@ Hello from STM32!
 
 This confirms successful UART transmission from the STM32 through the onboard ST-LINK Virtual COM Port to the PC.
 
+#### UART RX / Echo
+
+**Result: PASS**
+
+Tera Term was connected to `COM3` at `115200 8N1` with no flow control. The STM32 successfully received individual characters using polling and echoed each byte back to the PC.
+
+For troubleshooting, Tera Term `Local echo` was temporarily enabled. Typing `A` displayed `AA`: one locally displayed character and one character returned by the STM32. `Local echo` was then disabled, and typing `HELLO` displayed `HELLO` once, confirming the PC → STM32 → PC echo path.
+
 ### Issues Found
 
 #### Incorrect UART Handle
@@ -556,13 +591,13 @@ Current technical documentation includes:
 - Official NUCLEO-L476RG reference documentation
 - Educational KiCad schematic
 - Exported schematic PDF
-- UART configuration and TX implementation notes in this workflow
+- UART configuration, TX, RX polling, and echo implementation notes in this workflow
 
 ### Test Documentation
 
 UART TX configuration, serial connection, troubleshooting, and the successful TX test result are recorded in this workflow.
 
-Additional RX, echo, and interrupt-driven test results will be added as those milestones are completed.
+UART RX polling and echo implementation and successful test results are also recorded in this workflow. Interrupt-driven UART results will be added when that milestone is completed.
 
 ---
 
@@ -588,7 +623,13 @@ Commit:
 
 The UART TX milestone was then pushed successfully to `origin/main`.
 
-After the push, the local `main` branch and `origin/main` were synchronized.
+The UART RX / echo milestone was committed as:
+
+`15d0565` — `Implement and validate UART RX echo`
+
+The milestone was pushed successfully to `origin/main`.
+
+After the push, the local `main` branch and `origin/main` were synchronized and the working tree was clean.
 
 ---
 
@@ -597,15 +638,15 @@ After the push, the local `main` branch and `origin/main` were synchronized.
 ### Functionality
 
 - UART TX: Complete and validated
-- UART RX: Pending
-- UART echo: Pending
+- UART RX using polling: Complete and validated
+- UART echo: Complete and validated
 - Interrupt-driven UART: Pending
 
 ### Testing
 
 - UART TX test: PASS
-- UART RX testing: Pending
-- UART echo testing: Pending
+- UART RX polling test: PASS
+- UART echo test: PASS
 - Interrupt-driven UART testing: Pending
 
 ### Documentation
@@ -614,8 +655,9 @@ After the push, the local `main` branch and `origin/main` were synchronized.
 - Educational UART-to-USB VCP schematic: Complete
 - `.gitignore` documentation: Complete
 - UART TX implementation and test documentation: Complete
+- UART RX polling and echo implementation/test documentation: Complete
 - README: Pending
-- Remaining UART milestone documentation: Pending
+- Interrupt-driven UART documentation: Pending
 
 ### Repository
 
@@ -624,13 +666,16 @@ After the push, the local `main` branch and `origin/main` were synchronized.
 - Initial push completed
 - UART TX milestone committed as `0719cbe` — `Implement and validate UART TX`
 - UART TX milestone pushed successfully to `origin/main`
+- UART RX / echo milestone committed as `15d0565` — `Implement and validate UART RX echo`
+- UART RX / echo milestone pushed successfully to `origin/main`
 - Local `main` synchronized with `origin/main`
+- Working tree clean after push
 
 ### Final Status
 
 **Project in progress.**
 
-The UART TX milestone is complete, validated, documented, committed, and pushed to GitHub.
+The UART TX, polling-based UART RX, and UART echo milestones are complete, validated, documented, committed, and pushed to GitHub.
 
-The next implementation milestone is UART RX.
+The next implementation milestone is interrupt-driven UART communication.
 
