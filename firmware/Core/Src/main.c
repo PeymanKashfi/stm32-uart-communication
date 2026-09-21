@@ -45,6 +45,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+uint8_t rxData;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,7 +94,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  uint8_t rxData;
+  HAL_UART_Receive_IT(&huart2, &rxData, 1);
 
   /* USER CODE END 2 */
 
@@ -103,9 +105,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-	 HAL_UART_Receive(&huart2, &rxData, 1, HAL_MAX_DELAY);
-	 HAL_UART_Transmit(&huart2, &rxData, 1, HAL_MAX_DELAY);
 
   }
   /* USER CODE END 3 */
@@ -210,6 +209,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        HAL_UART_Transmit(&huart2, &rxData, 1, HAL_MAX_DELAY);
+        HAL_UART_Receive_IT(&huart2, &rxData, 1);
+    }
+}
 
 /* USER CODE END 4 */
 
