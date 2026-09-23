@@ -645,7 +645,13 @@ This demonstrated that both ends of an asynchronous UART connection must use mat
 
 ### README
 
-To be completed after the main UART milestones are implemented and validated.
+Completed after the main UART milestones and final validation.
+
+The README documents the project overview, hardware and tools, USART2 configuration, UART-to-USB VCP hardware path, implementation milestones, final validation results, project structure, official references, and key learnings.
+
+README commit:
+
+`4e0939d` — `Add project README and validation results`
 
 ### Technical Documentation
 
@@ -662,6 +668,12 @@ Current technical documentation includes:
 UART TX configuration, serial connection, troubleshooting, and the successful TX test result are recorded in this workflow.
 
 UART RX polling, echo, and interrupt-driven RX/echo implementation and successful test results are also recorded in this workflow.
+
+Final validation was completed with Tera Term configured for `COM3`, `115200 8N1`, no flow control, and `Local echo` disabled. The following final tests passed:
+
+- Mixed text and numeric data echo
+- Continuous multi-character echo without missing or duplicated characters
+- Reset/restart recovery while Tera Term remained connected
 
 ---
 
@@ -699,6 +711,12 @@ The interrupt-driven UART RX / echo milestone was committed as:
 
 The milestone was pushed successfully to `origin/main`.
 
+The project README and final validation results were committed as:
+
+`4e0939d` — `Add project README and validation results`
+
+The README commit was pushed successfully to `origin/main`.
+
 After the push, the local `main` branch and `origin/main` were synchronized and the working tree was clean.
 
 ---
@@ -718,6 +736,9 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 - UART RX polling test: PASS
 - UART echo test: PASS
 - Interrupt-driven UART RX / echo test: PASS
+- Final mixed text and numeric data echo test: PASS
+- Final continuous character echo test: PASS
+- Reset / restart recovery test: PASS
 
 ### Documentation
 
@@ -726,7 +747,7 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 - `.gitignore` documentation: Complete
 - UART TX implementation and test documentation: Complete
 - UART RX polling and echo implementation/test documentation: Complete
-- README: Pending
+- README: Complete
 - Interrupt-driven UART RX / echo implementation/test documentation: Complete
 
 ### Repository
@@ -740,14 +761,16 @@ After the push, the local `main` branch and `origin/main` were synchronized and 
 - UART RX / echo milestone pushed successfully to `origin/main`
 - Interrupt-driven UART RX / echo milestone committed as `5047fe2` — `Implement and validate interrupt-driven UART RX echo`
 - Interrupt-driven UART RX / echo milestone pushed successfully to `origin/main`
+- README and final validation results committed as `4e0939d` — `Add project README and validation results`
+- README commit pushed successfully to `origin/main`
 - Local `main` synchronized with `origin/main`
 - Working tree clean after push
 
 ### Final Status
 
-**Project in progress.**
+**Project complete.**
 
-The UART TX, polling-based UART RX, UART echo, and interrupt-driven UART RX / echo milestones are complete, validated, documented, committed, and pushed to GitHub.
+The UART TX, polling-based UART RX, UART echo, interrupt-driven UART RX / echo, final validation, README, and project documentation are complete.
 
-The remaining project work is final testing, README completion, and final project documentation/review.
+All implemented milestones have been validated, documented, committed, and pushed to GitHub.
 
